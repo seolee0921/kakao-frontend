@@ -13,12 +13,20 @@ import {
 import ImageIcon from "@mui/icons-material/Image";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { friends } from "./data";
+import axios from "axios";
 import { Box } from "@mui/system";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import FriendAdd from "./components/FriendAdd";
 
+type FriendType = {
+  id: number;
+  name: string;
+  statusMessage: string;
+};
+
 const Friends = (): JSX.Element => {
-  const [friendsList, setFriendList] = useState(friends);
+  const [originalFriends, setOriginalFriends] = useState<FriendType[]>([]);
+  const [friendsList, setFriendList] = useState<FriendType[]>([]);
   const [open, setOpen] = useState(false);
 
   const changeSearchText = (event: ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +34,7 @@ const Friends = (): JSX.Element => {
     if (inputText.length === 0) {
       setFriendList(friends);
     } else {
-      const fillteredFriends = friends.filter((friend) => {
+      const fillteredFriends = originalFriends.filter((friend) => {
         friend.name.includes(inputText);
       });
       setFriendList(fillteredFriends);
@@ -39,6 +47,18 @@ const Friends = (): JSX.Element => {
   const closeModal = () => {
     setOpen(false);
   };
+
+  const getFriendList = async () => {
+    const { data } = await axios.get<FriendType[]>(
+      "http://localhost:5000/friends/1"
+    );
+    setOriginalFriends(data);
+    setFriendList(data);
+  };
+
+  useEffect(() => {
+    getFriendList();
+  }, []); // 함수칸에 함수가 없으면 새로고침할때 한번만 실행함
 
   return (
     <Container>
